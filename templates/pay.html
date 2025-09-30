@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>결제하기</title>
+  <script src="https://democpay.payple.kr/js/v1/payment.js"></script>
+</head>
+<body>
+  <h2>토커 예약하기</h2>
+
+  <div>
+    <label><input type="radio" name="duration" value="15" data-price="9900" checked> 15분 (9,900원)</label><br>
+    <label><input type="radio" name="duration" value="30" data-price="19800"> 30분 (19,800원)</label><br>
+    <label><input type="radio" name="duration" value="45" data-price="29700"> 45분 (29,700원)</label><br>
+    <label><input type="radio" name="duration" value="60" data-price="39600"> 60분 (39,600원)</label>
+  </div>
+
+  <p>최종 금액: <span id="final">9,900</span>원</p>
+  <button onclick="pay()">지금 결제하기</button>
+
+  <!-- jQuery (먼저 로드) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!-- Payple SDK -->
+  <script src="https://democpay.payple.kr/js/v1/payment.js"></script>
+
+  <script>
+    function pay() {
+      let obj = {
+        clientKey: "test_DF55F29DA654A8CBC0F0A9DD4B556486",
+        PCD_CST_ID: "test",
+        PCD_CUST_KEY: "abcd1234567890",
+        PCD_PAY_TYPE: "card",
+        PCD_PAY_WORK: "CERT",
+        PCD_CARD_VER: "02",
+        PCD_PAY_GOODS: "테스트 상품",
+        PCD_PAY_TOTAL: 1000,
+        PCD_RST_URL: "http://localhost:5000/pay/result"
+      };
+
+      console.log("[pay] 호출 파라미터:", obj);
+
+      if (typeof PaypleCpayAuthCheck !== "function") {
+        alert("⚠️ Payple SDK가 아직 준비되지 않았습니다.");
+        return;
+      }
+
+      PaypleCpayAuthCheck(obj, function(result) {
+        console.log("[PaypleCpayAuthCheck 콜백]", result);
+        if (result.PCD_PAY_RST === "success") {
+          alert("결제 인증 성공! 요청키: " + result.PCD_PAY_REQKEY);
+        } else {
+          alert("결제 실패: " + result.PCD_PAY_MSG);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
