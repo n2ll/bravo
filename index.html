@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>Bravo Push</title></head>
+<body>
+  <button onclick="initPush()">🔔 알림 권한 허용</button>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSy8nVWvhYv9xSpuTsFwCT191HB31Tu1Ko_",
+      authDomain: "bravo-2954e.firebaseapp.com",
+      projectId: "bravo-2954e",
+      storageBucket: "bravo-2954e.appspot.com",
+      messagingSenderId: "527906393561",
+      appId: "1:527906393561:web:60206163b82b7898cb13a0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    async function initPush() {
+      const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      messaging.useServiceWorker(reg);
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return alert('알림 권한이 거부되었습니다.');
+      const token = await messaging.getToken({ vapidKey: 'BIA5dEeeCB2YaSWtzlrubUXEk74jfJL08WCcj6zSiLHkJJvArmkpp4XOvCzMttUHXtRnPi-5LtqIqoEMlhJ93G8' });
+      console.log("✅ 발급된 토큰:", token);
+      parent.postMessage({ type: 'FCM_TOKEN', token }, '*');
+    }
+  </script>
+</body>
+</html>
