@@ -2,16 +2,19 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>Bravo Push</title>
+  <title>Bravo Push (Debug)</title>
 </head>
 <body>
+  <h2>Bravo Push (Debug Version)</h2>
   <button onclick="initPush()">🔔 알림 권한 허용</button>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js"></script>
+  <!-- ✅ Firebase compat 버전 -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 
   <script>
+    console.log("🚀 [시작] 페이지 로드됨");
+
     // ✅ Firebase 설정
     const firebaseConfig = {
       apiKey: "AIzaSy8nVWvhYv9xSpuTsFwCT191HB31Tu1Ko_",
@@ -22,33 +25,64 @@
       appId: "1:527906393561:web:60206163b82b7898cb13a0"
     };
 
+    console.log("⚙️ Firebase 초기화 시작");
     firebase.initializeApp(firebaseConfig);
+    console.log("✅ Firebase 초기화 완료");
+
     const messaging = firebase.messaging();
 
-    // ✅ 푸시 초기화 함수
     async function initPush() {
+      console.log("▶️ [initPush] 실행됨");
       try {
-        // ⚠️ GitHub Pages는 /bravo/ 하위 경로이므로 서비스워커 경로 수정
+        // ✅ GitHub Pages 환경에서는 하위 폴더(bravo) 명시
+        console.log("🧩 서비스워커 등록 시도 중...");
         const reg = await navigator.serviceWorker.register('/bravo/firebase-messaging-sw.js');
-        messaging.useServiceWorker(reg);
+        console.log("✅ 서비스워커 등록 완료:", reg);
 
+        messaging.useServiceWorker(reg);
+        console.log("📦 messaging.useServiceWorker 연결 완료");
+
+        // ✅ 알림 권한 요청
+        console.log("🔔 알림 권한 요청 중...");
         const perm = await Notification.requestPermission();
+        console.log("🔔 권한 상태:", perm);
+
         if (perm !== 'granted') {
+          console.warn("⚠️ 알림 권한이 거부됨");
           alert('알림 권한이 거부되었습니다.');
           return;
         }
 
-        // ✅ VAPID 키로 토큰 발급
+        // ✅ FCM 토큰 발급 시도
+        console.log("🪄 FCM 토큰 요청 중...");
         const token = await messaging.getToken({
           vapidKey: 'BIA5dEeeCB2YaSWtzlrubUXEk74jfJL08WCcj6zSiLHkJJvArmkpp4XOvCzMttUHXtRnPi-5LtqIqoEMlhJ93G8'
         });
 
-        console.log("✅ 발급된 FCM 토큰:", token);
-        // iframe 통신용 (선택사항)
-        parent.postMessage({ type: 'FCM_TOKEN', token }, '*');
+        if (token) {
+          console.log("✅ 발급된 FCM 토큰:", token);
+          parent.postMessage({ type: 'FCM_TOKEN', token }, '*');
+        } else {
+          console.warn("⚠️ 토큰을 가져오지 못함 (null/undefined)");
+        }
+
       } catch (err) {
-        console.error('❌ FCM 초기화 오류:', err);
+        console.error("❌ [initPush] 에러 발생:", err);
       }
+    }
+
+    // ✅ 서비스워커 지원 여부 로그
+    if ('serviceWorker' in navigator) {
+      console.log("🧩 브라우저가 Service Worker를 지원합니다.");
+    } else {
+      console.error("❌ Service Worker를 지원하지 않는 브라우저입니다.");
+    }
+
+    // ✅ Notification API 지원 여부 로그
+    if ('Notification' in window) {
+      console.log("🔔 Notification API 지원 확인됨");
+    } else {
+      console.error("❌ Notification API를 지원하지 않습니다.");
     }
   </script>
 </body>
