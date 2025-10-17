@@ -39,7 +39,7 @@
         const reg = await navigator.serviceWorker.register('/bravo/firebase-messaging-sw.js');
         console.log("✅ 서비스워커 등록 완료:", reg);
 
-        messaging.useServiceWorker(reg);
+        //messaging.useServiceWorker(reg);
         console.log("📦 messaging.useServiceWorker 연결 완료");
 
         // ✅ 알림 권한 요청
@@ -87,3 +87,4 @@
   </script>
 </body>
 </html>
+
